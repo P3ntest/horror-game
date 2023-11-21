@@ -145,6 +145,10 @@ export class Player extends CharacterEntity {
 
   balls: THREE.Mesh[] = [];
 
+  updateFlashLightLevel() {
+    setFlashLightLevel(Math.ceil(this.flashLightBattery * 4));
+  }
+
   onUpdate(deltaTime: number) {
     const ray = new THREE.Raycaster(
       this.camera.getWorldPosition(new THREE.Vector3()),
@@ -195,7 +199,6 @@ export class Player extends CharacterEntity {
         this.flashLightOn = false;
         this.flashLight.intensity = 0;
       }
-      setFlashLightLevel(Math.ceil(this.flashLightBattery * 4));
     }
 
     const horizontal = this.keyboardController.getAxis("Horizontal");

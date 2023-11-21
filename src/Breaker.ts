@@ -158,6 +158,7 @@ export class Battery extends NonPhysicalEntity {
         this.world.removeEntity(this);
         player.flashLightBattery = 1;
         setShowPickupNote(false);
+        player.updateFlashLightLevel();
         playSound("Collect");
       }
     } else {
