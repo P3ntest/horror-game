@@ -111,6 +111,8 @@ export class Player extends CharacterEntity {
 
   flashLightOn = false;
 
+  sanity = 100;
+
   flashLightBattery = 1;
 
   footStepInterval = 0;

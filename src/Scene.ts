@@ -65,6 +65,7 @@ export class Scene extends NonPhysicalEntity {
   }
 
   onUpdate(deltaTime: number, tick: number): void {
+    this.lightsAmbientAudio.play();
     const player = this.world.requireEntityById("player") as Player;
 
     const playerPosition = player.transform.getPosition();

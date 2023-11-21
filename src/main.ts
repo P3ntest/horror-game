@@ -15,5 +15,5 @@ world.addEntity(player, "player");
 player.transform.setPosition(new Vector(0, 2, 0));
 
 const scene = new Scene();
-world.addEntity(scene);
+world.addEntity(scene, "scene");
 scene.transform.setPosition(new Vector(0, -4.5, 0));
