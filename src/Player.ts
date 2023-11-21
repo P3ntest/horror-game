@@ -9,6 +9,7 @@ import { PointerLockControls } from "three/addons/controls/PointerLockControls.j
 import { transformedNormalView } from "three/examples/jsm/nodes/Nodes.js";
 import { playSound } from "./sound";
 import { setFlashLightLevel, showFlashLightUI } from "./flashlight";
+import { BlackThing } from "./BlackThing";
 
 export class Player extends CharacterEntity {
   createCollider(): ColliderDesc {
@@ -50,6 +51,19 @@ export class Player extends CharacterEntity {
       (this.footStepInterval / 50) * 2 * Math.PI
     );
     this.camera.position.y = 0.95 + cameraWalkingBob * 0.06;
+  }
+
+  spawnBlackThing(): void {
+    const blackThing = new BlackThing();
+    const position = this.transform
+      .getPosition()
+      .add(
+        new Vector(Math.random() * 2 - 1, 0, Math.random() * 2 - 1)
+          .normalize()
+          .scale(20)
+      );
+    this.world.addEntity(blackThing);
+    blackThing.transform.setPosition(position);
   }
 
   camera: THREE.PerspectiveCamera;
@@ -171,6 +185,14 @@ export class Player extends CharacterEntity {
     newTranslation.y -= (9.8 * deltaTime) / 1000;
 
     this.desiredTranslation = newTranslation;
+
+    if (this.distanceToSpawn > 50) {
+      const blackThings = this.world.getEntitiesWithTag("blackThing");
+
+      if (blackThings.length < 3) {
+        this.spawnBlackThing();
+      }
+    }
 
     super.onUpdate(deltaTime);
     this.keyboardController.flushNewKeys();

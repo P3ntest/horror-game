@@ -5,10 +5,7 @@ import { Quaternion, Vector } from "./util/vector";
 export abstract class Entity {
   world!: World; // Late initialization by World.addEntity
   removed: boolean = false;
-
-  constructor() {
-    console.log("Created Entity");
-  }
+  tags: Set<string> = new Set();
 
   /**
    * Called before physics update

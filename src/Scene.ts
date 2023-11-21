@@ -6,6 +6,8 @@ import { ColliderDesc, RigidBodyDesc } from "@dimforge/rapier3d";
 import { Vector } from "./engine/util/vector";
 import { showFlashLightUI } from "./flashlight";
 import { Breaker } from "./Breaker";
+import { Player } from "./Player";
+import { distance } from "three/examples/jsm/nodes/Nodes.js";
 
 const textureLoader = new THREE.TextureLoader();
 
@@ -28,9 +30,10 @@ wallTexture.repeat.set(0.5, 0.5);
 const roofTexture = textureLoader.load("assets/roof.jpg");
 roofTexture.wrapS = THREE.RepeatWrapping;
 roofTexture.wrapT = THREE.RepeatWrapping;
-roofTexture.repeat.set(1, 1);
 
 const LIGHT_ON_INTENSITY = 0.8;
+
+const LIGHTS_VOLUME = 0.1;
 
 export class Scene extends NonPhysicalEntity {
   onInitGraphics(): void {
@@ -44,18 +47,25 @@ export class Scene extends NonPhysicalEntity {
   onRender(tick: number): void {}
 
   lightsAreOn: boolean = true;
-  lightsChangeTick: number = 0;
+  lightsChangeTick: number = Infinity;
   light: THREE.AmbientLight;
+
+  lightsAmbientAudio: HTMLAudioElement;
 
   onAdd(): void {
     super.onAdd();
 
-    this.generateRoom(0, 0);
-    this.lightsChangeTick = this.world.currentTick + 1000;
+    this.generateRoom(0, 0, false);
+
+    const audio = new Audio("assets/lights_ambient.wav");
+    audio.loop = true;
+    audio.volume = LIGHTS_VOLUME;
+    audio.play();
+    this.lightsAmbientAudio = audio;
   }
 
   onUpdate(deltaTime: number, tick: number): void {
-    const player = this.world.requireEntityById("player");
+    const player = this.world.requireEntityById("player") as Player;
 
     const playerPosition = player.transform.getPosition();
 
@@ -71,55 +81,75 @@ export class Scene extends NonPhysicalEntity {
         const roomZ = playerRoomZ + z;
 
         if (!this.rooms.has(`${roomX},${roomZ}`)) {
-          this.generateRoom(roomX, roomZ);
+          this.generateRoom(roomX, roomZ, roomX !== 0 || roomZ !== 0);
         }
       }
     }
 
-    // remove rooms that are too far away
-    const REMOVE_DISTANCE = 12; //;
+    //remove rooms that are too far away
+    const REMOVE_DISTANCE = 10; //;
     for (const room of this.rooms.values()) {
-      const distance = room.transform.getPosition().distanceTo(playerPosition);
-      if (distance > REMOVE_DISTANCE * ROOM_SIZE) {
+      const distanceX = Math.abs(room.x - playerRoomX);
+      const distanceZ = Math.abs(room.y - playerRoomZ);
+      if (distanceX > REMOVE_DISTANCE || distanceZ > REMOVE_DISTANCE) {
+        console.log("removing room");
         this.world.removeEntity(room);
-        const id = `${Math.floor(
-          room.transform.getPosition().x / ROOM_SIZE
-        )},${Math.floor(room.transform.getPosition().z / ROOM_SIZE)}`;
+        this.rooms.delete(room.id);
+      }
+    }
 
-        this.rooms.delete(id);
+    if (player.distanceToSpawn > 20) {
+      if (this.lightsChangeTick === Infinity) {
+        this.lightsChangeTick = tick + 100 + Math.random() * 500;
       }
     }
 
     if (tick > this.lightsChangeTick) {
       this.lightsAreOn = !this.lightsAreOn;
 
-      this.light.intensity = this.lightsAreOn ? LIGHT_ON_INTENSITY : 0.02;
+      this.light.intensity = this.lightsAreOn ? LIGHT_ON_INTENSITY : 0.001;
 
-      this.lightsChangeTick = tick + 500;
+      this.lightsChangeTick = tick + 500 + Math.random() * 500;
       showFlashLightUI();
+
+      this.lightsAmbientAudio.volume = this.lightsAreOn ? LIGHTS_VOLUME : 0;
+    }
+
+    if (player.distanceToSpawn > 50) {
+      wallTexture.offset.y += 0.001;
     }
   }
 
-  generateRoom(x: number, y: number) {
-    const room = new Room();
+  generateRoom(x: number, y: number, generateWalls = true) {
+    const room = new Room(x, y, generateWalls);
     this.world.addEntity(room);
     room.transform.setPosition(new Vector(x * ROOM_SIZE, 0, y * ROOM_SIZE));
-    this.rooms.set(`${x},${y}`, room);
+    this.rooms.set(room.id, room);
     room.generateBreaker();
   }
 }
 
 class Room extends PhysicsEntity {
-  constructor() {
+  constructor(public x: number, public y: number, public generateWalls = true) {
     super();
-
-    this.walls = new Array(4).fill(0).map(() => Math.random() > 0.4) as [
-      boolean,
-      boolean,
-      boolean,
-      boolean
-    ];
+    if (!generateWalls) {
+      console.log("no walls");
+    }
+    this.walls = generateWalls
+      ? (new Array(4).fill(0).map(() => Math.random() > 0.4) as [
+          boolean,
+          boolean,
+          boolean,
+          boolean
+        ])
+      : [false, false, false, false];
   }
+
+  get id() {
+    return `${this.x},${this.y}`;
+  }
+
+  breaker: Breaker | null = null;
 
   generateBreaker() {
     if (this.walls[1] && Math.random() > 0.9) {
@@ -130,6 +160,14 @@ class Room extends PhysicsEntity {
           .getPosition()
           .add(new Vector(ROOM_SIZE / 4, ROOM_HEIGHT / 2, 0.1))
       );
+      this.breaker = breaker;
+    }
+  }
+
+  onRemove(): void {
+    super.onRemove();
+    if (this.breaker) {
+      this.breaker.onRemove();
     }
   }
 
@@ -255,6 +293,8 @@ class Room extends PhysicsEntity {
       }
     });
   }
+
+  doesMove: boolean = Math.random() > 0.5;
 
   onRender(tick: number): void {}
 }

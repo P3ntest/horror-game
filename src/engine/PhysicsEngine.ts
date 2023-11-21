@@ -8,17 +8,13 @@ export const PHYSICS_WORLD_SCALE = 1;
 export class PhysicsEngine {
   world: RAPIER.World = new RAPIER.World(new RAPIER.Vector3(0, -9.81, 0));
 
-  constructor() {
-    console.log("Created PhysicsEngine");
-  }
-
   step() {
     this.world.step();
   }
 }
 
 export abstract class PhysicsEntity extends Entity {
-  get transform(): Transform {
+  get transform(): RigidBodyTransform {
     return new RigidBodyTransform(this.body);
   }
 
@@ -30,11 +26,6 @@ export abstract class PhysicsEntity extends Entity {
     const [tx, ty] = target;
     const angle = Math.atan2(ty - y, tx - x);
     // this.transform.setRotation(angle);
-  }
-
-  constructor() {
-    super();
-    console.log("Created PhysicsEntity");
   }
 
   onAdd(): void {
@@ -58,6 +49,7 @@ export abstract class PhysicsEntity extends Entity {
 
   _remove(): void {
     super._remove();
+    console.log("removing", this.colliders.length, "colliders");
     this.colliders.forEach((collider) => {
       this.world.physicsEngine.world.removeCollider(collider, true);
     });
@@ -96,6 +88,12 @@ export class RigidBodyTransform implements Transform {
 
   setRotation(rotation: Quaternion) {
     this.body.setRotation(rotation, true);
+  }
+
+  lookAt(target: Vector) {
+    const angle = target.subtract(this.getPosition()).angle();
+
+    this.setRotation(Quaternion.fromAxisAngle(new Vector(0, 1, 0), angle));
   }
 }
 

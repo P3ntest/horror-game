@@ -52,6 +52,10 @@ export class World {
     return entity;
   }
 
+  getEntitiesWithTag(tag: string) {
+    return Array.from(this.entities).filter((entity) => entity.tags.has(tag));
+  }
+
   addEntity(entity: Entity, id: string | null = null) {
     this.entities.add(entity);
 
@@ -61,9 +65,9 @@ export class World {
 
     entity.world = this;
     entity.onInitGraphics();
-    entity.onInitPhysics();
     entity._attachContainer();
     entity.onAdd();
+    entity.onInitPhysics();
   }
 
   removeEntity(entity: Entity) {
