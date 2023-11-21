@@ -98,7 +98,17 @@ export class Player extends CharacterEntity {
 
   footStepInterval = 0;
 
+  distanceToSpawn = 0;
+  checkDistanceToSpawnIn = 10;
   onUpdate(deltaTime: number) {
+    this.checkDistanceToSpawnIn--;
+    if (this.checkDistanceToSpawnIn <= 0) {
+      this.distanceToSpawn = this.transform.getPosition().length() / 5;
+      document.getElementById("distanceTraveled").innerText = `${Math.round(
+        this.distanceToSpawn
+      )}m`;
+    }
+
     if (this.footStepInterval <= 0) {
       playSound("FootStep");
       this.footStepInterval = 50;

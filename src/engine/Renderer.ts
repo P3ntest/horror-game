@@ -13,10 +13,10 @@ export class Renderer {
 
     const canvas = this.renderer.domElement;
     document.body.appendChild(canvas);
-    canvas.addEventListener("click", () => {
+    document.body.addEventListener("click", () => {
       canvas.requestPointerLock();
     });
-    canvas.addEventListener("mousemove", (e) => {
+    document.body.addEventListener("mousemove", (e) => {
       Input.instance.addMouseMovement(e.movementX, e.movementY);
     });
   }

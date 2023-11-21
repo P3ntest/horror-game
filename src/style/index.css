@@ -1,0 +1,21 @@
+body {
+}
+
+#ui {
+  position: fixed;
+  width: 100vw;
+  height: 100vh;
+
+  z-index: 100;
+}
+
+#distanceTraveled {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  text-align: center;
+
+  color: white;
+  font-size: 40px;
+}

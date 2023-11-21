@@ -5,6 +5,7 @@ import { Physics, PhysicsEntity } from "./engine/PhysicsEngine";
 import { World } from "./engine/World";
 import { Quaternion, Vector } from "./engine/util/vector";
 import * as THREE from "three";
+import "./style/index.css";
 
 const world = new World();
 
