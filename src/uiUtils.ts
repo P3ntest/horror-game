@@ -28,3 +28,10 @@ export function setFlashLightLevel(level: number) {
     }
   }
 }
+
+export function setShowPickupNote(show: boolean) {
+  const note = document.getElementById("pickupNote");
+  if (note) {
+    note.style.opacity = show ? "1" : "0";
+  }
+}

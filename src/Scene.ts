@@ -4,7 +4,7 @@ import * as THREE from "three";
 import { PhysicsEntity } from "./engine/PhysicsEngine";
 import { ColliderDesc, RigidBodyDesc } from "@dimforge/rapier3d";
 import { Vector } from "./engine/util/vector";
-import { showFlashLightUI } from "./flashlight";
+import { showFlashLightUI } from "./uiUtils";
 import { Breaker } from "./Breaker";
 import { Player } from "./Player";
 import { distance } from "three/examples/jsm/nodes/Nodes.js";
@@ -153,7 +153,8 @@ class Room extends PhysicsEntity {
   breaker: Breaker | null = null;
 
   generateBreaker() {
-    if (this.walls[1] && Math.random() > 0.9) {
+    const distanceFromSpawn = Math.sqrt(this.x ** 2 + this.y ** 2) * ROOM_SIZE;
+    if (this.walls[1] && Math.random() > 0.9 && distanceFromSpawn > 20) {
       const breaker = new Breaker();
       this.world.addEntity(breaker);
       breaker.transform.setPosition(

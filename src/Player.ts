@@ -6,9 +6,9 @@ import { Vector } from "./engine/util/vector";
 import { Input } from "./engine/util/Input";
 import * as THREE from "three";
 import { PointerLockControls } from "three/addons/controls/PointerLockControls.js";
-import { transformedNormalView } from "three/examples/jsm/nodes/Nodes.js";
+import { int, transformedNormalView } from "three/examples/jsm/nodes/Nodes.js";
 import { playSound } from "./sound";
-import { setFlashLightLevel, showFlashLightUI } from "./flashlight";
+import { setFlashLightLevel, showFlashLightUI } from "./uiUtils";
 import { BlackThing } from "./BlackThing";
 
 export class Player extends CharacterEntity {
@@ -102,7 +102,7 @@ export class Player extends CharacterEntity {
 
     target.position.set(0, 0, -10);
 
-    flashContainer.position.set(0, -0.5, 0);
+    flashContainer.position.set(0, -0.9, 0);
 
     this.flashLight = flashLight;
   }
@@ -119,7 +119,30 @@ export class Player extends CharacterEntity {
 
   distanceToSpawn = 0;
   checkDistanceToSpawnIn = 10;
+
+  targetedMeshes: THREE.Object3D[] = [];
+
+  balls: THREE.Mesh[] = [];
+
   onUpdate(deltaTime: number) {
+    const ray = new THREE.Raycaster(
+      this.camera.getWorldPosition(new THREE.Vector3()),
+      this.camera.getWorldDirection(new THREE.Vector3()),
+      0,
+      1.9
+    );
+
+    const intersections = ray.intersectObjects(
+      this.world.renderer.scene.children,
+      true
+    );
+
+    this.targetedMeshes = intersections.map(
+      (intersection) => intersection.object
+    );
+
+    console.log(this.targetedMeshes);
+
     this.checkDistanceToSpawnIn--;
     if (this.checkDistanceToSpawnIn <= 0) {
       this.distanceToSpawn = this.transform.getPosition().length() / 4;
