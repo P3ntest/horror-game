@@ -6,6 +6,8 @@ import { Vector } from "./engine/util/vector";
 import { Input } from "./engine/util/Input";
 import * as THREE from "three";
 import { PointerLockControls } from "three/addons/controls/PointerLockControls.js";
+import { transformedNormalView } from "three/examples/jsm/nodes/Nodes.js";
+import { playSound } from "./sound";
 
 export class Player extends CharacterEntity {
   createCollider(): ColliderDesc {
@@ -42,6 +44,11 @@ export class Player extends CharacterEntity {
         .rotate(new Vector(0, 1, 0), -mouseMovement[0] * mouseSensitivity)
     );
     this.camera.rotation.x -= mouseMovement[1] * mouseSensitivity;
+
+    const cameraWalkingBob = Math.sin(
+      (this.footStepInterval / 50) * 2 * Math.PI
+    );
+    this.camera.position.y = 0.95 + cameraWalkingBob * 0.06;
   }
 
   camera: THREE.PerspectiveCamera;
@@ -61,16 +68,52 @@ export class Player extends CharacterEntity {
 
     this.camera = camera;
 
-    // const testCapsule = new THREE.Mesh(
-    //   new THREE.CylinderGeometry(0.5, 0.5, 3),
-    //   new THREE.MeshBasicMaterial({ color: 0xff0000 })
-    // );
+    const flashContainer = new THREE.Group();
 
-    // this.container.add(testCapsule);
-    // testCapsule.position.z = -2;
+    const flashLight = new THREE.SpotLight(
+      0xccffee,
+      0,
+      0,
+      Math.PI / 10,
+      0.56,
+      2.3
+    );
+
+    const target = new THREE.Object3D();
+    flashContainer.add(target);
+    flashContainer.add(flashLight);
+    flashLight.target = target;
+    this.camera.add(flashContainer);
+
+    target.position.set(0, 0, -10);
+
+    flashContainer.position.set(0, -0.5, 0);
+
+    this.flashLight = flashLight;
   }
 
+  flashLight: THREE.SpotLight;
+
+  flashLightOn = false;
+
+  footStepInterval = 0;
+
   onUpdate(deltaTime: number) {
+    if (this.footStepInterval <= 0) {
+      playSound("FootStep");
+      this.footStepInterval = 50;
+    }
+
+    const newButtons = this.keyboardController.newKeys;
+
+    if (newButtons.has("KeyF")) {
+      this.flashLightOn = !this.flashLightOn;
+
+      this.flashLight.intensity = this.flashLightOn ? 60 : 0;
+
+      playSound("FlashLight");
+    }
+
     const horizontal = this.keyboardController.getAxis("Horizontal");
     const vertical = -this.keyboardController.getAxis("Vertical");
     let movement = new Vector(horizontal, 0, vertical).normalize();
@@ -90,11 +133,22 @@ export class Player extends CharacterEntity {
 
     const newTranslation = newVelocity.scale(deltaTime / 1000);
 
+    if (currentVelocity.length() > 0) {
+      const currentHorizontalVelocity = new Vector(
+        currentVelocity.x,
+        0,
+        currentVelocity.z
+      );
+
+      this.footStepInterval -= currentHorizontalVelocity.length() * 0.2;
+    }
+
     // gravity
     newTranslation.y -= (9.8 * deltaTime) / 1000;
 
     this.desiredTranslation = newTranslation;
 
     super.onUpdate(deltaTime);
+    this.keyboardController.flushNewKeys();
   }
 }

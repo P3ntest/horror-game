@@ -30,20 +30,27 @@ roofTexture.repeat.set(1, 1);
 
 export class Scene extends NonPhysicalEntity {
   onInitGraphics(): void {
-    // const light = new THREE.DirectionalLight(0xffffff, 3);
-    // light.position.set(10, 10, 10);
-    // light.rotation.set(1, 0, 1);
-    // // light.castShadow = true;
-    // this.container.add(light);
-    const ambient = new THREE.AmbientLight(0xffffdd, 1);
+    const ambient = new THREE.AmbientLight(0xffffdd, 0.8);
     this.container.add(ambient);
+    this.light = ambient;
   }
 
   rooms: Map<string, Room> = new Map();
 
   onRender(tick: number): void {}
 
-  onUpdate(deltaTime: number): void {
+  lightsAreOn: boolean = true;
+  lightsChangeTick: number = 0;
+  light: THREE.AmbientLight;
+
+  onAdd(): void {
+    super.onAdd();
+
+    this.generateRoom(0, 0);
+    this.lightsChangeTick = this.world.currentTick + 1000;
+  }
+
+  onUpdate(deltaTime: number, tick: number): void {
     const player = this.world.requireEntityById("player");
 
     const playerPosition = player.transform.getPosition();
@@ -63,6 +70,14 @@ export class Scene extends NonPhysicalEntity {
           this.generateRoom(roomX, roomZ);
         }
       }
+    }
+
+    if (tick > this.lightsChangeTick) {
+      this.lightsAreOn = !this.lightsAreOn;
+
+      this.light.intensity = this.lightsAreOn ? 1 : 0.02;
+
+      this.lightsChangeTick = tick + 500;
     }
   }
 

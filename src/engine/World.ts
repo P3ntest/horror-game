@@ -7,13 +7,16 @@ export class World {
   physicsEngine: PhysicsEngine = new PhysicsEngine();
   physicsTicker: Ticker = new Ticker((n) => this.physicsTick(n));
 
+  currentTick: number = 0;
+
   physicsTick(deltaTime: number) {
+    this.currentTick++;
     for (const entity of this.entities) {
-      entity.onUpdate(deltaTime);
+      entity.onUpdate(deltaTime, this.currentTick);
     }
     this.physicsEngine.step();
     for (const entity of this.entities) {
-      entity.onPostUpdate(deltaTime);
+      entity.onPostUpdate(deltaTime, this.currentTick);
     }
   }
 

@@ -7,17 +7,17 @@ export abstract class Entity {
 
   constructor() {
     console.log("Created Entity");
-  } 
+  }
 
   /**
    * Called before physics update
    */
-  onUpdate(deltaTime: number) {}
+  onUpdate(deltaTime: number, currentTick: number) {}
 
   /**
    * Called after physics update
    */
-  onPostUpdate(deltaTime: number) {}
+  onPostUpdate(deltaTime: number, currentTick: number) {}
 
   /**
    * Called before rendering
