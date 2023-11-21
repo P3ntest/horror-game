@@ -51,6 +51,25 @@ export class Player extends CharacterEntity {
       (this.footStepInterval / 50) * 2 * Math.PI
     );
     this.camera.position.y = 0.95 + cameraWalkingBob * 0.06;
+
+    const cameraPosition = this.camera.getWorldPosition(new THREE.Vector3());
+    this.flashContainer.position.set(
+      cameraPosition.x,
+      cameraPosition.y - 1,
+      cameraPosition.z
+    );
+
+    const desiredRotation = this.camera.getWorldQuaternion(
+      new THREE.Quaternion()
+    );
+
+    const currentRotation = this.flashContainer.quaternion;
+
+    // we have two quaternions, we want to rotate currentRotation to desiredRotation by a small amount depending on the distance. so if its close we rotate a bit, if its far we rotate a lot
+
+    const rotationDelta = currentRotation.slerp(desiredRotation, 0.1);
+
+    this.flashContainer.setRotationFromQuaternion(rotationDelta);
   }
 
   spawnBlackThing(): void {
@@ -98,16 +117,18 @@ export class Player extends CharacterEntity {
     flashContainer.add(target);
     flashContainer.add(flashLight);
     flashLight.target = target;
-    this.camera.add(flashContainer);
+    this.flashContainer = flashContainer;
+    this.world.renderer.scene.add(flashContainer);
 
     target.position.set(0, 0, -10);
 
-    flashContainer.position.set(0, -0.9, 0);
+    flashContainer.position.set(0, 0, 0);
 
     this.flashLight = flashLight;
   }
 
   flashLight: THREE.SpotLight;
+  flashContainer: THREE.Group;
 
   flashLightOn = false;
 
@@ -129,7 +150,7 @@ export class Player extends CharacterEntity {
       this.camera.getWorldPosition(new THREE.Vector3()),
       this.camera.getWorldDirection(new THREE.Vector3()),
       0,
-      1.9
+      2.5
     );
 
     const intersections = ray.intersectObjects(
