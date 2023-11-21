@@ -17,3 +17,5 @@ player.transform.setPosition(new Vector(0, 2, 0));
 const scene = new Scene();
 world.addEntity(scene, "scene");
 scene.transform.setPosition(new Vector(0, -4.5, 0));
+
+document.getElementById("commit").innerHTML = window.COMMIT_NAME;
