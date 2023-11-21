@@ -8,6 +8,7 @@ import * as THREE from "three";
 import { PointerLockControls } from "three/addons/controls/PointerLockControls.js";
 import { transformedNormalView } from "three/examples/jsm/nodes/Nodes.js";
 import { playSound } from "./sound";
+import { setFlashLightLevel, showFlashLightUI } from "./flashlight";
 
 export class Player extends CharacterEntity {
   createCollider(): ColliderDesc {
@@ -96,6 +97,8 @@ export class Player extends CharacterEntity {
 
   flashLightOn = false;
 
+  flashLightBattery = 1;
+
   footStepInterval = 0;
 
   distanceToSpawn = 0;
@@ -122,6 +125,17 @@ export class Player extends CharacterEntity {
       this.flashLight.intensity = this.flashLightOn ? 60 : 0;
 
       playSound("FlashLight");
+      showFlashLightUI();
+    }
+
+    if (this.flashLightOn) {
+      this.flashLightBattery -= deltaTime / 1000 / 60;
+
+      if (this.flashLightBattery <= 0) {
+        this.flashLightOn = false;
+        this.flashLight.intensity = 0;
+      }
+      setFlashLightLevel(Math.ceil(this.flashLightBattery * 4));
     }
 
     const horizontal = this.keyboardController.getAxis("Horizontal");

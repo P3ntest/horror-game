@@ -19,3 +19,43 @@ body {
   color: white;
   font-size: 40px;
 }
+
+#flashLightContainer {
+  position: fixed;
+  right: 0;
+  top: 0;
+}
+
+#flashLightEdge {
+  border: white 3px solid;
+  display: flex;
+  flex-direction: row;
+  border-radius: 10px;
+  gap: 5px;
+  padding: 5px;
+}
+
+#flashLight {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin: 10px;
+}
+
+#flashLightInfo {
+  color: white;
+}
+
+#flashLightNub {
+  background-color: white;
+  width: 5px;
+  height: 25px;
+  border-radius: 0 10px 10px 0;
+}
+
+.flashLightBlock {
+  background-color: white;
+  width: 15px;
+  /* margin: 5px; */
+  height: 30px;
+}

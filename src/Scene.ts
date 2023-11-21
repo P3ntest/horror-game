@@ -4,6 +4,7 @@ import * as THREE from "three";
 import { PhysicsEntity } from "./engine/PhysicsEngine";
 import { ColliderDesc, RigidBodyDesc } from "@dimforge/rapier3d";
 import { Vector } from "./engine/util/vector";
+import { showFlashLightUI } from "./flashlight";
 
 const textureLoader = new THREE.TextureLoader();
 
@@ -28,9 +29,11 @@ roofTexture.wrapS = THREE.RepeatWrapping;
 roofTexture.wrapT = THREE.RepeatWrapping;
 roofTexture.repeat.set(1, 1);
 
+const LIGHT_ON_INTENSITY = 0.8;
+
 export class Scene extends NonPhysicalEntity {
   onInitGraphics(): void {
-    const ambient = new THREE.AmbientLight(0xffffdd, 0.8);
+    const ambient = new THREE.AmbientLight(0xffffdd, LIGHT_ON_INTENSITY);
     this.container.add(ambient);
     this.light = ambient;
   }
@@ -75,9 +78,10 @@ export class Scene extends NonPhysicalEntity {
     if (tick > this.lightsChangeTick) {
       this.lightsAreOn = !this.lightsAreOn;
 
-      this.light.intensity = this.lightsAreOn ? 1 : 0.02;
+      this.light.intensity = this.lightsAreOn ? LIGHT_ON_INTENSITY : 0.02;
 
       this.lightsChangeTick = tick + 500;
+      showFlashLightUI();
     }
   }
 
