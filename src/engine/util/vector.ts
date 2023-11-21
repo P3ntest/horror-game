@@ -70,6 +70,10 @@ export class Vector {
     );
   }
 
+  distanceTo(other: Vector) {
+    return this.subtract(other).length();
+  }
+
   angle() {
     return Math.atan2(this.x, this.z);
   }

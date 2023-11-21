@@ -56,6 +56,21 @@ export abstract class PhysicsEntity extends Entity {
     }
   }
 
+  _remove(): void {
+    super._remove();
+    this.colliders.forEach((collider) => {
+      this.world.physicsEngine.world.removeCollider(collider, true);
+    });
+
+    // TODO: Remove body, this currently crashes the game
+    // if (this.body) {
+    //   const body = this.world.physicsEngine.world.getRigidBody(
+    //     this.body.handle
+    //   );
+    //   this.world.physicsEngine.world.removeRigidBody(body);
+    // }
+  }
+
   abstract createColliders(): RAPIER.ColliderDesc[];
 
   abstract getBodyDesc(): RAPIER.RigidBodyDesc;

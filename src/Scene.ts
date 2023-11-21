@@ -5,6 +5,7 @@ import { PhysicsEntity } from "./engine/PhysicsEngine";
 import { ColliderDesc, RigidBodyDesc } from "@dimforge/rapier3d";
 import { Vector } from "./engine/util/vector";
 import { showFlashLightUI } from "./flashlight";
+import { Breaker } from "./Breaker";
 
 const textureLoader = new THREE.TextureLoader();
 
@@ -75,6 +76,20 @@ export class Scene extends NonPhysicalEntity {
       }
     }
 
+    // remove rooms that are too far away
+    const REMOVE_DISTANCE = 12; //;
+    for (const room of this.rooms.values()) {
+      const distance = room.transform.getPosition().distanceTo(playerPosition);
+      if (distance > REMOVE_DISTANCE * ROOM_SIZE) {
+        this.world.removeEntity(room);
+        const id = `${Math.floor(
+          room.transform.getPosition().x / ROOM_SIZE
+        )},${Math.floor(room.transform.getPosition().z / ROOM_SIZE)}`;
+
+        this.rooms.delete(id);
+      }
+    }
+
     if (tick > this.lightsChangeTick) {
       this.lightsAreOn = !this.lightsAreOn;
 
@@ -90,6 +105,7 @@ export class Scene extends NonPhysicalEntity {
     this.world.addEntity(room);
     room.transform.setPosition(new Vector(x * ROOM_SIZE, 0, y * ROOM_SIZE));
     this.rooms.set(`${x},${y}`, room);
+    room.generateBreaker();
   }
 }
 
@@ -103,6 +119,18 @@ class Room extends PhysicsEntity {
       boolean,
       boolean
     ];
+  }
+
+  generateBreaker() {
+    if (this.walls[1] && Math.random() > 0.9) {
+      const breaker = new Breaker();
+      this.world.addEntity(breaker);
+      breaker.transform.setPosition(
+        this.transform
+          .getPosition()
+          .add(new Vector(ROOM_SIZE / 4, ROOM_HEIGHT / 2, 0.1))
+      );
+    }
   }
 
   walls: [boolean, boolean, boolean, boolean];

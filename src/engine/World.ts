@@ -12,10 +12,12 @@ export class World {
   physicsTick(deltaTime: number) {
     this.currentTick++;
     for (const entity of this.entities) {
+      if (entity.removed) continue;
       entity.onUpdate(deltaTime, this.currentTick);
     }
     this.physicsEngine.step();
     for (const entity of this.entities) {
+      if (entity.removed) continue;
       entity.onPostUpdate(deltaTime, this.currentTick);
     }
   }
@@ -23,6 +25,7 @@ export class World {
   renderTicks: number = 0;
   renderTick() {
     for (const entity of this.entities) {
+      if (entity.removed) continue;
       entity._syncTransformToContainer();
       entity.onRender(this.renderTicks);
     }
@@ -65,5 +68,7 @@ export class World {
 
   removeEntity(entity: Entity) {
     this.entities.delete(entity);
+    entity._remove();
+    entity.onRemove();
   }
 }

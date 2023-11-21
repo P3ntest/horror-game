@@ -4,6 +4,7 @@ import { Quaternion, Vector } from "./util/vector";
 
 export abstract class Entity {
   world!: World; // Late initialization by World.addEntity
+  removed: boolean = false;
 
   constructor() {
     console.log("Created Entity");
@@ -46,6 +47,11 @@ export abstract class Entity {
 
   _attachContainer() {
     this.world.renderer.scene.add(this.container);
+  }
+
+  _remove() {
+    this.removed = true;
+    this.world.renderer.scene.remove(this.container);
   }
 
   container: THREE.Group = new THREE.Group();
