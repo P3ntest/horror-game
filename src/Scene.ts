@@ -33,7 +33,7 @@ roofTexture.wrapT = THREE.RepeatWrapping;
 
 const LIGHT_ON_INTENSITY = 0.8;
 
-const LIGHTS_VOLUME = 0.1;
+const LIGHTS_VOLUME = 0.04;
 
 export class Scene extends NonPhysicalEntity {
   onInitGraphics(): void {
@@ -57,7 +57,7 @@ export class Scene extends NonPhysicalEntity {
 
     this.generateRoom(0, 0, false);
 
-    const audio = new Audio("assets/lights_ambient.wav");
+    const audio = new Audio("assets/light_ambient.mp3");
     audio.loop = true;
     audio.volume = LIGHTS_VOLUME;
     audio.play();

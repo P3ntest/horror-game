@@ -122,7 +122,7 @@ export class Player extends CharacterEntity {
   onUpdate(deltaTime: number) {
     this.checkDistanceToSpawnIn--;
     if (this.checkDistanceToSpawnIn <= 0) {
-      this.distanceToSpawn = this.transform.getPosition().length() / 5;
+      this.distanceToSpawn = this.transform.getPosition().length() / 4;
       document.getElementById("distanceTraveled").innerText = `${Math.round(
         this.distanceToSpawn
       )}m`;
