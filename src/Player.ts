@@ -75,7 +75,7 @@ export class Player extends CharacterEntity {
   }
 
   spawnBlackThing(): void {
-    const DISTANCE = 15;
+    const DISTANCE = 25;
 
     const blackThing = new BlackThing();
     const position = this.transform
