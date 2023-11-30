@@ -117,6 +117,10 @@ export class Scene extends NonPhysicalEntity {
     }
 
     wallTexture.offset.y += 0.001 * player.difficulty.wallSpeed;
+    floorTexture.offset.y += 0.001 * player.difficulty.floorSpeed;
+    floorTexture.offset.x += 0.001 * player.difficulty.floorSpeed;
+    roofTexture.offset.y += 0.001 * player.difficulty.ceilingSpeed;
+    roofTexture.offset.x += 0.001 * player.difficulty.ceilingSpeed;
   }
 
   generateRoom(x: number, y: number, generateWalls = true) {

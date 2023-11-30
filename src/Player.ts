@@ -175,9 +175,9 @@ export class Player extends CharacterEntity {
       this.handleSpawnBlackThings();
     }
 
-    if (newButtons.has("KeyE")) {
-      this.kill();
-    }
+    // if (newButtons.has("KeyE")) {
+    //   this.kill();
+    // }
 
     this.handleMovement(deltaTime);
 

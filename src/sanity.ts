@@ -5,5 +5,7 @@ export function getSettingsForSanity(insanity: number) {
     // the number of black things that spawn,
     blackThings: Math.max(0, Math.round((insanity - 1) * 3)),
     wallSpeed: insanity > 2 ? 1 : 0,
+    floorSpeed: insanity > 3 ? 1 : 0,
+    ceilingSpeed: insanity > 4 ? 1 : 0,
   };
 }
