@@ -7,6 +7,7 @@ import { Quaternion, Vector } from "./engine/util/vector";
 import * as THREE from "three";
 import "./style/index.css";
 import { BlackThing } from "./BlackThing";
+import { Telephone } from "./Telephone";
 
 const world = new World();
 
@@ -18,4 +19,5 @@ const scene = new Scene();
 world.addEntity(scene, "scene");
 scene.transform.setPosition(new Vector(0, -4.5, 0));
 
-document.getElementById("commit").innerHTML = window.COMMIT_NAME;
+const telephoneSounds = new Telephone();
+world.addEntity(telephoneSounds, "telephone");

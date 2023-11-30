@@ -166,8 +166,6 @@ export class Player extends CharacterEntity {
       (intersection) => intersection.object
     );
 
-    console.log(this.targetedMeshes);
-
     this.checkDistanceToSpawnIn--;
     if (this.checkDistanceToSpawnIn <= 0) {
       this.distanceToSpawn = this.transform.getPosition().length() / 4;
@@ -194,6 +192,7 @@ export class Player extends CharacterEntity {
 
     if (this.flashLightOn) {
       this.flashLightBattery -= deltaTime / 1000 / 60;
+      this.updateFlashLightLevel();
 
       if (this.flashLightBattery <= 0) {
         this.flashLightOn = false;
