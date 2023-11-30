@@ -2,7 +2,6 @@ export class KeyboardController {
   attachTo(element: HTMLElement) {
     element.addEventListener("keydown", (e) => this.onKeyDown(e));
     element.addEventListener("keyup", (e) => this.onKeyUp(e));
-    console.log("Attached KeyboardController to element");
   }
 
   downKeys: Set<string> = new Set();

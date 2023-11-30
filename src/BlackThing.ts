@@ -143,10 +143,7 @@ export class BlackThing extends PhysicsEntity {
     if (this.demonNoise) {
       const volume = Math.max(0, 1 - distanceToPlayer / CUTOFF_DISTANCE);
       const logVolume = Math.log(volume + 1);
-      // logarithmic volume
       this.demonNoise.volume = volume;
-
-      console.log(volume);
     }
 
     if (distanceToPlayer < 3.5) {

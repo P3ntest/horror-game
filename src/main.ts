@@ -21,3 +21,6 @@ scene.transform.setPosition(new Vector(0, -4.5, 0));
 
 const telephoneSounds = new Telephone();
 world.addEntity(telephoneSounds, "telephone");
+
+console.log("Rust WASM module loaded");
+console.log('Husky Engine loaded version 2.0.0 "WoolfWoof"');

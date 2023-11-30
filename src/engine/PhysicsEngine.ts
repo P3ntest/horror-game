@@ -49,7 +49,6 @@ export abstract class PhysicsEntity extends Entity {
 
   _remove(): void {
     super._remove();
-    console.log("removing", this.colliders.length, "colliders");
     this.colliders.forEach((collider) => {
       this.world.physicsEngine.world.removeCollider(collider, true);
     });

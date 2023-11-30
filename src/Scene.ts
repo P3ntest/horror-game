@@ -71,7 +71,7 @@ export class Scene extends NonPhysicalEntity {
     const playerPosition = player.transform.getPosition();
 
     // procedural generation
-    const GENERATION_DISTANCE = 8;
+    const GENERATION_DISTANCE = 10;
 
     const playerRoomX = Math.floor(playerPosition.x / ROOM_SIZE);
     const playerRoomZ = Math.floor(playerPosition.z / ROOM_SIZE);
@@ -93,7 +93,6 @@ export class Scene extends NonPhysicalEntity {
       const distanceX = Math.abs(room.x - playerRoomX);
       const distanceZ = Math.abs(room.y - playerRoomZ);
       if (distanceX > REMOVE_DISTANCE || distanceZ > REMOVE_DISTANCE) {
-        console.log("removing room");
         this.world.removeEntity(room);
         this.rooms.delete(room.id);
       }
@@ -107,6 +106,10 @@ export class Scene extends NonPhysicalEntity {
 
     if (tick > this.lightsChangeTick) {
       this.lightsAreOn = !this.lightsAreOn;
+
+      this.world.renderer.scene.background = new THREE.Color(
+        this.lightsAreOn ? 0x67683d : 0x000000
+      );
 
       this.light.intensity = this.lightsAreOn ? LIGHT_ON_INTENSITY : 0.001;
 
@@ -135,9 +138,6 @@ export class Scene extends NonPhysicalEntity {
 class Room extends PhysicsEntity {
   constructor(public x: number, public y: number, public generateWalls = true) {
     super();
-    if (!generateWalls) {
-      console.log("no walls");
-    }
     this.walls = generateWalls
       ? (new Array(4).fill(0).map(() => Math.random() > 0.4) as [
           boolean,

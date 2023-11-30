@@ -9,6 +9,8 @@ export class Renderer {
 
   constructor() {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
+
+    this.scene.background = new THREE.Color(0x67683d);
     // this.renderer.shadowMap.enabled = true;
 
     const canvas = this.renderer.domElement;

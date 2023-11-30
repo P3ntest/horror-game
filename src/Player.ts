@@ -13,6 +13,15 @@ import { BlackThing } from "./BlackThing";
 import { Scene } from "./Scene";
 import { getSettingsForSanity } from "./sanity";
 
+let mouseSensitivityMultiplier = parseFloat(
+  localStorage.getItem("mouseSensitivity") ?? "1"
+);
+
+window["mouseSensitivity"] = (sens) => {
+  localStorage.setItem("mouseSensitivity", sens);
+  mouseSensitivityMultiplier = sens;
+};
+
 export class Player extends CharacterEntity {
   createCollider(): ColliderDesc {
     return Physics.ColliderDesc.capsule(0.5, 0.5);
@@ -40,7 +49,7 @@ export class Player extends CharacterEntity {
   onRender(tick: number): void {
     const mouseMovement = Input.instance.flushMouseMovement();
 
-    const mouseSensitivity = 0.002;
+    const mouseSensitivity = 0.002 * mouseSensitivityMultiplier;
 
     this.transform.setRotation(
       this.transform
@@ -171,7 +180,6 @@ export class Player extends CharacterEntity {
 
       this.handleFlashLightUpdate(deltaTime);
       this.updateSanity(deltaTime);
-      console.log(this.insanity.toFixed(2), this.difficulty.blackThings);
       this.handleSpawnBlackThings();
     }
 

@@ -35,8 +35,6 @@ export class World {
   }
 
   constructor() {
-    console.log("Created World");
-
     this.physicsTicker.start();
     this.renderTick();
   }
