@@ -10,6 +10,8 @@ import { int, transformedNormalView } from "three/examples/jsm/nodes/Nodes.js";
 import { playSound } from "./sound";
 import { setFlashLightLevel, showFlashLightUI } from "./uiUtils";
 import { BlackThing } from "./BlackThing";
+import { Scene } from "./Scene";
+import { getSettingsForSanity } from "./sanity";
 
 export class Player extends CharacterEntity {
   createCollider(): ColliderDesc {
@@ -73,13 +75,15 @@ export class Player extends CharacterEntity {
   }
 
   spawnBlackThing(): void {
+    const DISTANCE = 15;
+
     const blackThing = new BlackThing();
     const position = this.transform
       .getPosition()
       .add(
         new Vector(Math.random() * 2 - 1, 0, Math.random() * 2 - 1)
           .normalize()
-          .scale(20)
+          .scale(DISTANCE)
       );
     this.world.addEntity(blackThing);
     blackThing.transform.setPosition(position);
@@ -132,7 +136,7 @@ export class Player extends CharacterEntity {
 
   flashLightOn = false;
 
-  sanity = 100;
+  insanity = 0; // increases, technically "insanity"
 
   flashLightBattery = 1;
 
@@ -149,57 +153,65 @@ export class Player extends CharacterEntity {
     setFlashLightLevel(Math.ceil(this.flashLightBattery * 4));
   }
 
+  get difficulty() {
+    return getSettingsForSanity(this.insanity);
+  }
+
   onUpdate(deltaTime: number) {
-    const ray = new THREE.Raycaster(
-      this.camera.getWorldPosition(new THREE.Vector3()),
-      this.camera.getWorldDirection(new THREE.Vector3()),
-      0,
-      2.5
-    );
-
-    const intersections = ray.intersectObjects(
-      this.world.renderer.scene.children,
-      true
-    );
-
-    this.targetedMeshes = intersections.map(
-      (intersection) => intersection.object
-    );
-
-    this.checkDistanceToSpawnIn--;
-    if (this.checkDistanceToSpawnIn <= 0) {
-      this.distanceToSpawn = this.transform.getPosition().length() / 4;
-      document.getElementById("distanceTraveled").innerText = `${Math.round(
-        this.distanceToSpawn
-      )}m`;
-    }
-
-    if (this.footStepInterval <= 0) {
-      playSound("FootStep");
-      this.footStepInterval = 50;
-    }
-
     const newButtons = this.keyboardController.newKeys;
 
-    if (newButtons.has("KeyF")) {
-      this.flashLightOn = !this.flashLightOn;
+    if (!this.killed) {
+      this.updateLookingAtIntersections();
+      this.updateDistanceTraveledUI();
+      this.handleFootsteps();
 
-      this.flashLight.intensity = this.flashLightOn ? 60 : 0;
+      if (newButtons.has("KeyF")) {
+        this.handleToggleFlashLight();
+      }
 
-      playSound("FlashLight");
-      showFlashLightUI();
+      this.handleFlashLightUpdate(deltaTime);
+      this.updateSanity(deltaTime);
+      console.log(this.insanity.toFixed(2));
+      this.handleSpawnBlackThings();
     }
 
-    if (this.flashLightOn) {
-      this.flashLightBattery -= deltaTime / 1000 / 60;
-      this.updateFlashLightLevel();
+    if (newButtons.has("KeyE")) {
+      this.kill();
+    }
 
-      if (this.flashLightBattery <= 0) {
-        this.flashLightOn = false;
-        this.flashLight.intensity = 0;
+    this.handleMovement(deltaTime);
+
+    super.onUpdate(deltaTime);
+    this.keyboardController.flushNewKeys();
+  }
+
+  killed = false;
+  private handleSpawnBlackThings() {
+    const scene = this.world.requireEntityById("scene") as Scene;
+    if (!scene.lightsAreOn) {
+      const blackThings = this.world.getEntitiesWithTag("blackThing");
+
+      if (blackThings.length < this.difficulty.blackThings) {
+        this.spawnBlackThing();
       }
     }
+  }
 
+  private updateSanity(deltaTime: number) {
+    const scene = this.world.requireEntityById("scene") as Scene;
+    if (scene.lightsAreOn) {
+      this.insanity -= (deltaTime / 1000 / 60) * 0.8;
+    } else {
+      if (this.flashLightOn) {
+        this.insanity += (deltaTime / 1000 / 60) * 1.4;
+      } else {
+        this.insanity += (deltaTime / 1000 / 60) * 5;
+      }
+    }
+    this.insanity = Math.max(0, this.insanity);
+  }
+
+  private handleMovement(deltaTime: number) {
     const horizontal = this.keyboardController.getAxis("Horizontal");
     const vertical = -this.keyboardController.getAxis("Vertical");
     let movement = new Vector(horizontal, 0, vertical).normalize();
@@ -233,16 +245,82 @@ export class Player extends CharacterEntity {
     newTranslation.y -= (9.8 * deltaTime) / 1000;
 
     this.desiredTranslation = newTranslation;
+  }
 
-    if (this.distanceToSpawn > 50) {
-      const blackThings = this.world.getEntitiesWithTag("blackThing");
+  private handleFlashLightUpdate(deltaTime: number) {
+    if (this.flashLightOn) {
+      this.flashLightBattery -= deltaTime / 1000 / 60;
+      this.updateFlashLightLevel();
 
-      if (blackThings.length < 3) {
-        this.spawnBlackThing();
+      if (this.flashLightBattery <= 0) {
+        this.flashLightOn = false;
+        this.flashLight.intensity = 0;
       }
     }
+  }
 
-    super.onUpdate(deltaTime);
-    this.keyboardController.flushNewKeys();
+  private handleToggleFlashLight() {
+    this.flashLightOn = !this.flashLightOn;
+
+    this.flashLight.intensity = this.flashLightOn ? 60 : 0;
+
+    playSound("FlashLight");
+    showFlashLightUI();
+  }
+
+  private handleFootsteps() {
+    if (this.footStepInterval <= 0) {
+      playSound("FootStep");
+      this.footStepInterval = 50;
+    }
+  }
+
+  private updateDistanceTraveledUI() {
+    this.checkDistanceToSpawnIn--;
+    if (this.checkDistanceToSpawnIn <= 0) {
+      this.distanceToSpawn = this.transform.getPosition().length() / 4;
+      document.getElementById("distanceTraveled").innerText = `${Math.round(
+        this.distanceToSpawn
+      )}m`;
+    }
+  }
+
+  private updateLookingAtIntersections() {
+    const ray = new THREE.Raycaster(
+      this.camera.getWorldPosition(new THREE.Vector3()),
+      this.camera.getWorldDirection(new THREE.Vector3()),
+      0,
+      2.5
+    );
+
+    const intersections = ray.intersectObjects(
+      this.world.renderer.scene.children,
+      true
+    );
+
+    this.targetedMeshes = intersections.map(
+      (intersection) => intersection.object
+    );
+  }
+
+  kill() {
+    if (this.killed) return;
+    // glitch out of the world
+    this.killed = true;
+    this.transform.setPosition(
+      new Vector(
+        this.transform.getPosition().x,
+        this.transform.getPosition().y - 2,
+        this.transform.getPosition().z
+      )
+    );
+
+    const diedSoundAmbient = new Audio("assets/diedambient.wav");
+    diedSoundAmbient.volume = 0.4;
+    diedSoundAmbient.play();
+
+    const diedSound = new Audio("assets/died.wav");
+    diedSound.volume = 1;
+    diedSound.play();
   }
 }

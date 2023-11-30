@@ -116,9 +116,7 @@ export class Scene extends NonPhysicalEntity {
       this.lightsAmbientAudio.volume = this.lightsAreOn ? LIGHTS_VOLUME : 0;
     }
 
-    if (player.distanceToSpawn > 50) {
-      wallTexture.offset.y += 0.001;
-    }
+    wallTexture.offset.y += 0.001 * player.difficulty.wallSpeed;
   }
 
   generateRoom(x: number, y: number, generateWalls = true) {

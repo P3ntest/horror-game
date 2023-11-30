@@ -93,6 +93,18 @@ export class Vector {
   [Symbol.iterator]() {
     return [this.x, this.y, this.z][Symbol.iterator]();
   }
+
+  toThree() {
+    return new THREE.Vector3(this.x, this.y, this.z);
+  }
+
+  angleBetween(other: Vector) {
+    return Math.acos(this.dot(other) / (this.length() * other.length()));
+  }
+
+  toString() {
+    return `(${this.x.toFixed(2)}, ${this.y.toFixed(2)}, ${this.z.toFixed(2)})`;
+  }
 }
 
 export class Quaternion {
