@@ -40,7 +40,7 @@ export class Player extends CharacterEntity {
   onRender(tick: number): void {
     const mouseMovement = Input.instance.flushMouseMovement();
 
-    const mouseSensitivity = 0.001;
+    const mouseSensitivity = 0.002;
 
     this.transform.setRotation(
       this.transform
@@ -112,9 +112,9 @@ export class Player extends CharacterEntity {
       0xccffee,
       0,
       0,
-      Math.PI / 10,
+      Math.PI / 8,
       0.56,
-      2.3
+      2
     );
 
     const target = new THREE.Object3D();
@@ -171,7 +171,7 @@ export class Player extends CharacterEntity {
 
       this.handleFlashLightUpdate(deltaTime);
       this.updateSanity(deltaTime);
-      console.log(this.insanity.toFixed(2));
+      console.log(this.insanity.toFixed(2), this.difficulty.blackThings);
       this.handleSpawnBlackThings();
     }
 
@@ -200,7 +200,7 @@ export class Player extends CharacterEntity {
   private updateSanity(deltaTime: number) {
     const scene = this.world.requireEntityById("scene") as Scene;
     if (scene.lightsAreOn) {
-      this.insanity -= (deltaTime / 1000 / 60) * 0.8;
+      this.insanity -= (deltaTime / 1000 / 60) * 0.4;
     } else {
       if (this.flashLightOn) {
         this.insanity += (deltaTime / 1000 / 60) * 1.4;
@@ -262,7 +262,7 @@ export class Player extends CharacterEntity {
   private handleToggleFlashLight() {
     this.flashLightOn = !this.flashLightOn;
 
-    this.flashLight.intensity = this.flashLightOn ? 60 : 0;
+    this.flashLight.intensity = this.flashLightOn ? 100 : 0;
 
     playSound("FlashLight");
     showFlashLightUI();

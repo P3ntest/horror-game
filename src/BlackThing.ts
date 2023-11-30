@@ -70,7 +70,7 @@ export class BlackThing extends PhysicsEntity {
     const thisPosition = this.transform.getPosition();
     const delta = playerPosition.subtract(thisPosition);
 
-    const SPEED = 3;
+    const SPEED = player.difficulty.blackThingsSpeedMultiplier * 3;
 
     const direction = delta.normalize().scale(SPEED);
 
